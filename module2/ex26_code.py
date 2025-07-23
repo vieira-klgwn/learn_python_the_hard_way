@@ -10,7 +10,7 @@ print("I am currently {} inches tall".format(ex26.height))
 
 ex26.__dict__['height'] = 1000
 print(f"I am now {ex26.height} inches tal")
-
+2
 ex26.height = 12
 print(f"Ooops, now I'm {ex26.__dict__['height']} inches tall")
 
