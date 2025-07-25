@@ -1,0 +1,92 @@
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling", "hatch-vcs>=0.3", "setuptools-scm>=7.1"]
+
+[project]
+authors = [
+  {name = "Zed Shaw", email = "help@learncodethehardway.com"}
+]
+classifiers = [
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Topic :: Software Development :: Libraries :: Python Modules"
+]
+dependencies = [
+  # package requirements go here
+]
+description = "A test project"
+dynamic = ["version"]
+license = {text = "MIT"}
+name = "test_project"
+readme = "README.rst"
+requires-python = ">=3.9"
+
+[project.optional-dependencies]
+test = [
+  "pytest",
+  "pytest-cov",
+  "mypy"
+]
+
+[project.scripts]
+test_project = "test_project.cli:cli"
+
+[project.urls]
+repository = "https://github.com/lcthw/test_project"
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  # This covers both typing.TYPE_CHECKING and plain TYPE_CHECKING, with any amount of whitespace
+  "if\\s+(typing\\.)?TYPE_CHECKING:",
+  'if __name__ == "__main__":'
+]
+omit = [
+  "src/test_project/__main__.py",
+  "src/test_project/_version.py",
+  "tests/*"
+]
+
+[tool.distutils.bdist_wheel]
+universal = true
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/test_project/_version.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/src/test_project",
+  "/pyproject.toml"
+]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.mypy]
+disallow_untyped_defs = true
+files = ["src/test_project/**/*.py"]
+python_version = "3.9"
+warn_no_return = true
+
+[tool.pytest.ini_options]
+addopts = [
+  "-vv",
+  "--color=yes",
+  "--cov-append",
+  "--cov-branch",
+  "--cov-report=term-missing",
+  "--cov=test_project",
+  "--tb=native",
+  "--strict-markers",
+  "--durations=20"
+]
+markers = [
+  "serial: execute test serially (to avoid race conditions)",
+  "slow: tests can take a long time (deselect with '-m \"not slow\"')"
+]
+norecursedirs = [".*", "*.egg*", "build", "dist", "conda.recipe", "examples", "env", "envs", "scripts"]

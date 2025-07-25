@@ -1,0 +1,62 @@
+{% set pyproject = load_file_data('../pyproject.toml', from_recipe_dir=True) %}
+{% set version = pyproject['project']['version'] %}
+{% set project = pyproject['project'] %}
+
+package:
+  name: test-project
+  version: {{ version }}
+
+source:
+  path: ..
+
+build:
+  # If the installation is complex, or different between Unix and Windows, use
+  # separate bld.bat and build.sh files instead of this key.  Add the line
+  # "skip: True  # [py<35]" (for example) to limit to Python 3.5 and newer, or
+  # "skip: True  # [not win]" to limit to Windows.
+  script: {{ PYTHON }} -m pip install --no-build-isolation --no-deps --ignore-installed -vv .
+  noarch: python
+  number: 0
+  entry_points:
+    {% for name, reference in project['scripts'].items() %}
+    - {{ name }} = {{ reference }}
+    {% endfor %}
+
+requirements:
+  # if you need compilers, uncomment these
+  #    read more at https://docs.conda.io/projects/conda-build/en/latest/resources/compiler-tools.html
+  # build:
+  #   - {{ compilers('c') }}
+  host:
+    - python {{ project['requires-python'] }}
+    - pip
+    {% for dep in pyproject['build-system']['requires'] %}
+    - {{ dep.lower() }}
+    {% endfor %}
+  run:
+    - python {{ project['requires-python'] }}
+    {% for dep in project['dependencies'] %}
+    - {{ dep.lower() }}
+    {% endfor %}
+
+test:
+  imports:
+    - test_project
+  source_files:
+    - tests
+  requires:
+    {% for dep in project['optional-dependencies']['test'] %}
+    - {{ dep.lower() }}
+    {% endfor %}
+  commands:
+    - pytest
+    {% for name in project['scripts'] %}
+    - {{ name }}
+    {% endfor %}
+    - python -c "from test_project import __version__; assert __version__ == \"{{ version }}\""
+
+about:
+  home: https://github.com/lcthw/test_project
+  summary: A test project
+  license: {{ pyproject.get('license') }}
+  license_file: LICENSE
