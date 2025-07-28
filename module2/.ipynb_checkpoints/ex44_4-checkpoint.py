@@ -16,4 +16,3 @@ becky = Person_new('Becky', 39, green)
 becky['talk']('I am talking here!')
     
     
-        
