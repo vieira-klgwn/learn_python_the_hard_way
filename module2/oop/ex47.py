@@ -5,6 +5,9 @@ from sys import exit
 # testing if  I can access the dialogue
 # print(dialogue.DIALOGUE['CentralCorridor_enter'])
 # It works haha , here we go
+# 
+
+# GAME DESCRIPTION CAN BE FOUND: https://github.com/vieira-klgwn/learn_python_the_hard_way/blob/main/module2/oop/ex47_dialogue.py
 
 class Scene(object):
 
