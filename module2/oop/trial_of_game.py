@@ -1,8 +1,8 @@
 import ex47_dialogue as dialogue
 
-# testing if  I can access the dialogue
-# print(dialogue.DIALOGUE['CentralCorridor_enter'])
-# It works haha , here we go
+# # testing if  I can access the dialogue
+# # print(dialogue.DIALOGUE['CentralCorridor_enter'])
+# # It works haha , here we go
 
 class Scene(object):
 
@@ -18,11 +18,13 @@ class Engine(object):
     
     def play(self):
         current_scene = self.map.open_scene()
+        current_scene_name = self.map.current_scene
         while True:
-            if current_scene == 'finished' or current_scene == 'death':
+            if current_scene_name == 'finished' or current_scene_name == 'death':
                 break
             next_scene_name = current_scene.enter()
             current_scene = self.map.next_scene(next_scene_name)
+            current_scene_name = self.map.current_scene
        
            
 class Death(Scene):
@@ -32,6 +34,7 @@ class Death(Scene):
         print("You're worse than my dog")
         print("You're a useless hero")
         print("Go to where you belong luser. You're such a looser !")
+        return 'death'
         
 # test the death scene
 # dead = Death()
@@ -76,15 +79,16 @@ class TheBridge(Scene):
     def enter(self):
         print(dialogue.DIALOGUE['TheBridge_enter'])
         choice = input("> ")
-        if choice == 'throw bomb':
+        if choice in ['throw','throw bomb', 'throw_bomb']:
             print(dialogue.DIALOGUE['TheBridge_throw_bomb'])
             return 'death'
-        elif choice == 'place_bomb':
+        elif choice in ['place', 'place bomb', 'place_bomb']:
             print(dialogue.DIALOGUE['TheBridge_place_bomb'])
             return 'escape_pod'
         else:
             print("You are spoiling the game , I don't know what you mean by that input")
             return 'the_bridge'
+
     
 
 class EscapePod(Scene):
@@ -98,14 +102,19 @@ class EscapePod(Scene):
         else:
             print(dialogue.DIALOGUE['EscapePod_death'])
             return 'death'
-
+class Finished(Scene):
+    def enter(self):
+        pass
+    
+        
 class Map(object):
     scenes = {
         'central_corridor':CentralCorridor(),
         'laser_weapon_armory':LaserWeaponArmory(),
         'the_bridge':TheBridge(),
-        'EscapePod':EscapePod(), 
-        'death':Death()
+        'escape_pod':EscapePod(), 
+        'death':Death(),
+        'finished': Finished()
     }
     def __init__(self, start_scene):
         if start_scene not in self.scenes:
