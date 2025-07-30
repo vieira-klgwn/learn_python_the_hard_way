@@ -6,13 +6,13 @@ import re
 import sys
 
 #open the pdf
-infile = open(sys.argv[1], "rb")
+infile = open(sys.argv[1], "rb") # reading and binary
 
 # convert it to text
 pdf = pdftotext.PDF(infile)
 
 
-lines = "".join(pdf).split("\n")# FYI, this splits each start of newline into another element of an array. 
+lines = " ".join(pdf).split("\n")# FYI, this splits each start of newline into another element of an array. 
 # it means that each other line become a array member
 
 num = 1
@@ -31,7 +31,7 @@ ignore = re.compile(r"^\s*$")
 for line in lines:
     if numbers.match(line):
         print("Line much number:", line)
-    elif numbers.match(line):
+    elif ignore.match(line):
         print("Line match ignore:", line)
     else:
         pass
