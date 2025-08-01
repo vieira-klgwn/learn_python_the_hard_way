@@ -5,6 +5,7 @@ import os
 import re
 import pprint 
 import pdftotext
+from io import BytesIO
 
 
 # make a directory to put in the pdfs from  the link 'https://learncodethehardway.com/setup/python/ttb/'
@@ -36,17 +37,32 @@ for link in soup.find_all('a', href=True):
 
 for pdf_link in pdf_links:
     filename = os.path.basename(pdf_link)
-    filepath = os.path.join(DOWNLOAD_DIR, 'ttb_pdfs')
+    filepath = os.path.join(DOWNLOAD_DIR, filename)
     if not os.path.exists(filepath):
         print(f"📥 Downloading {filename}...")
         try:
             file = request.urlopen(pdf_link)
-            content = pdftotext.PDF(file)
+            file_bytes = file.read()
+            
+            # add the downloaded file the disk by copying the downlaoded content to the file
+            with open(filepath, 'wb') as f:
+                f.write(file_bytes)
+                
+            pdf_data = pdftotext.PDF(BytesIO(file_bytes))
+            print(f"✅ Downloaded: {filename}")
             # processs file content to list of lines
-            lines = "".join(content).split("\n")
+            lines = "".join(pdf_data).split("\n")
+            num = 1
             for line in lines:
                 # do data munging on them
-                print(line)
+                #e.g finding all digits with spaces of commas
+                digits = re.search(r'^[,\d\s]+$',line)
+                if digits:
+                    print(f"We've got this [{num}]: {digits.group()}")
+                    num += 1
+                else:
+                    pass
+                
 
         except Exception as e:
             print(f"❌ Failed to download {pdf_link}: {e}")
