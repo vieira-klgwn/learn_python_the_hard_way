@@ -1,9 +1,11 @@
 
 from django.http import HttpResponse, HttpResponseRedirect
+
+
 from .models import Question, Choice
 from django.http import Http404
 from django.shortcuts import render,get_object_or_404
-from django.db.models import F
+from django.db.models import F, Count
 from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
@@ -20,7 +22,7 @@ class IndexView(generic.ListView):
 		"""Return the last five published questions(not incluceing those 
 		set to be published in the future)"""
 
-		return Question.objects.filter(pub_date__lte=timezone.now()).order_by("-pub_date")[:5]
+		return Question.objects.filter(pub_date__lte=timezone.now()).annotate(num_choice=Count("choice")).filter(num_choice__gt=0).order_by("-pub_date")[:5]
 
 
 

@@ -3,10 +3,20 @@ import datetime
 from django.utils import timezone
 from sqlalchemy.testing import future
 
-from .models import Question
+from .models import Question, Choice
 from django.urls import reverse
 
 # Create your tests here.
+def create_question(question_text, days):
+    """
+        Create a question with the given `question_text` and published the
+        given number of `days` offset to now (negative for questions published
+        in the past, positive for questions that have yet to be published).
+        """
+    time = timezone.now() + datetime.timedelta(days=days)
+    return Question.objects.create(question_text=question_text, pub_date=time)
+
+
 
 class QuestionModelTest(TestCase):
     def test_was_published_recently_with_future_question(self):
@@ -20,14 +30,14 @@ class QuestionModelTest(TestCase):
         recent_question = Question(pub_date=time)
         return self.assertIs(recent_question.was_published_recently(), True)
 
-def create_question(question_text, days):
-    """
-        Create a question with the given `question_text` and published the
-        given number of `days` offset to now (negative for questions published
-        in the past, positive for questions that have yet to be published).
-        """
-    time = timezone.now() + datetime.timedelta(days=days)
-    return Question.objects.create(question_text=question_text, pub_date=time)
+    def test_does_question_has_choices(self):
+        time = timezone.now() + datetime.timedelta(days=-30)
+        question = Question.objects.create(question_text="What are you doing today?", pub_date=time)
+        response = self.client.get(reverse('polls:index'))
+        self.assertContains(response, "No polls are available")
+        self.assertQuerySetEqual(response.context['latest_question_list'], [])
+
+
 
 
 
@@ -38,7 +48,6 @@ class QuestionIndexViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'No polls are available')
         self.assertQuerySetEqual(response.context['latest_question_list'], [])
-
 
     def test_past_questions(self):
         """
@@ -55,6 +64,7 @@ class QuestionIndexViewTest(TestCase):
                 the index page.
                 """
         question = create_question('Future question', days=30)
+        choice = Choice.objects.create(question=question, choice_text='Choose one', votes=0)
         response = self.client.get(reverse('polls:index'))
         self.assertContains(response, 'No polls are available')
         self.assertQuerySetEqual(response.context['latest_question_list'], [])
@@ -67,14 +77,15 @@ class QuestionIndexViewTest(TestCase):
                 """
         question = create_question('Past question', days=-30)
         create_question(question_text='Future question', days=30)
+        choice = Choice.objects.create(question=question, choice_text='Choose one', votes=0)
         response = self.client.get(reverse('polls:index'))
         self.assertQuerySetEqual(response.context['latest_question_list'], [question])
 
-def test_two_past_questions(self):
-    question1 = create_question('Past question 1', days=-30)
-    question2 =create_question('Past question 2', days=-30)
-    response = self.client.get(reverse('polls:index'))
-    self.assertQuerySetEqual(response.context['latest_question_list'], [question1, question2, ])
+    def test_two_past_questions(self):
+        question1 = create_question('Past question 1', days=-30)
+        question2 =create_question('Past question 2', days=-30)
+        response = self.client.get(reverse('polls:index'))
+        self.assertQuerySetEqual(response.context['latest_question_list'], [question1, question2, ])
 
 
 class QuestionDetailViewTest(TestCase):
